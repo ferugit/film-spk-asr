@@ -38,7 +38,7 @@ pip install -r requirements.txt
 - **Base model**: `mistralai/Voxtral-Mini-3B-2507` — `bash scripts/download_voxtral_model.sh`
 - **x-vector extractor** (Spk-Cond only): SiAMResNet34 TorchScript model at
   `models/SiAMResNet34/samresnet34_w_features.jit`
-  (from the [WeSpeaker](https://github.com/wenet-e2c/wespeaker) toolkit, pretrained on
+  (from the [WeSpeaker](https://github.com/wenet-e2e/wespeaker) toolkit, pretrained on
   VoxBlink2 + VoxCeleb2).
 
 ## Data
@@ -99,7 +99,7 @@ python src/scripts/compare_qa_results.py
 ## Citation
 
 ```bibtex
-@inproceedings{lopez2025film,
+@inproceedings{lopez2026film,
   title     = {FiLM-Based Speaker Conditioning of a SpeechLLM for Pathological Speech Recognition},
   author    = {L\'opez, Fernando and Kesiraju, Santosh and Luque, Jordi},
   booktitle = {Odyssey 2026: The Speaker and Language Recognition Workshop},
