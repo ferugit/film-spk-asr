@@ -1,0 +1,73 @@
+# Encoder-Only LoRA Fine-tuning Configuration for Voxtral
+# NeuRoVoz ONLY (Spanish) - No TORGO
+# Uses LoRA adapters on audio encoder, connector, and linear layers only
+
+# Training strategy: "full", "encoder_only", or "lora"
+training_strategy: "lora"
+
+# Reproducibility
+seed: 2026  # Random seed for reproducibility
+
+model_checkpoint: "mistralai/Voxtral-Mini-3B-2507"
+output_dir: "./models/voxtral-encoder-lora-finetuned-neurovoz"
+dataset_path: "data/neurovoz/neurovoz_dataset"
+cache_dir: "./models"
+
+# Weighted sampling - DISABLED (single language, no need to balance)
+use_weighted_sampler: false
+
+# LoRA hyperparameters (only used when training_strategy="lora")
+lora_r: 8  # Rank of LoRA matrices (higher = more parameters, default: 8)
+lora_alpha: 16  # LoRA scaling factor (typically 2*r, default: 16)
+lora_dropout: 0.1  # Dropout for LoRA layers (default: 0.1)
+lora_target_modules: [
+  "audio_tower.layers.*.self_attn.q_proj",
+  "audio_tower.layers.*.self_attn.k_proj",
+  "audio_tower.layers.*.self_attn.v_proj",
+  "audio_tower.layers.*.self_attn.out_proj",
+  "audio_tower.layers.*.fc1",
+  "audio_tower.layers.*.fc2",
+  "multi_modal_projector.linear_1",
+  "multi_modal_projector.linear_2"
+]  # Audio encoder attention + linear layers + connector
+
+# Batch sizes - can use larger batches due to LoRA efficiency
+per_device_train_batch_size: 4  # Increased (LoRA uses minimal memory)
+per_device_eval_batch_size: 4
+gradient_accumulation_steps: 4  # Effective batch = 16
+
+# Learning rate - can use higher LR for LoRA
+learning_rate: 3e-4  # Higher than encoder-only (LoRA adapts quickly)
+
+# Training duration
+num_train_epochs: 10  # More epochs since training is very fast
+
+# Precision and optimization
+bf16: true
+optim: "adamw_torch_fused"
+weight_decay: 0.01
+max_grad_norm: 1.0
+gradient_checkpointing: true
+
+# Logging and evaluation
+logging_steps: 50
+eval_steps: 200
+save_steps: 200
+eval_strategy: "steps"
+save_strategy: "steps"
+
+# Model selection and early stopping
+load_best_model_at_end: true
+metric_for_best_model: "eval_loss"
+greater_is_better: false
+save_total_limit: 3
+early_stopping_patience: 5
+
+# Learning rate schedule
+warmup_steps: 100
+lr_scheduler_type: "cosine"
+
+# System
+report_to: "tensorboard"
+remove_unused_columns: false
+dataloader_num_workers: 2

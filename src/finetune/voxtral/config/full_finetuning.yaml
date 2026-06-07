@@ -1,0 +1,59 @@
+# Full Fine-tuning Configuration
+# All model parameters are trained (encoder + decoder + LM head)
+# This approach provides maximum adaptation but requires more compute resources
+
+# Training strategy: "full", "encoder_only", or "lora"
+training_strategy: "full"
+
+# Reproducibility
+seed: 2026  # Random seed for reproducibility
+
+model_checkpoint: "mistralai/Voxtral-Mini-3B-2507"
+output_dir: "./models/voxtral-finetuned-neurovoz-torgo"
+dataset_path: "data/combined_neurovoz_torgo"
+cache_dir: "./models"
+
+# Weighted sampling to oversample Spanish samples
+use_weighted_sampler: true  # or false (default)
+spanish_weight: 3.0  # Weight for Spanish samples: 1.0 = no weighting, >1.0 increases Spanish sample frequency
+
+# Batch sizes - conservative settings for 40GB GPU memory
+per_device_train_batch_size: 1  # Small batch due to full model training
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 16  # Effective batch size = 16
+
+# Learning rate - conservative for full fine-tuning to avoid catastrophic forgetting
+learning_rate: 1e-5  # Lower LR for stable full model adaptation
+
+# Training duration
+num_train_epochs: 3  # Usually sufficient for full fine-tuning
+
+# Precision and optimization
+bf16: true
+optim: "adamw_torch_fused"
+weight_decay: 0.01
+max_grad_norm: 1.0
+gradient_checkpointing: true  # Essential for memory efficiency
+
+# Logging and evaluation
+logging_steps: 50
+eval_steps: 200  # Evaluate every 200 steps
+save_steps: 200  # Save checkpoint every 200 steps
+eval_strategy: "steps"
+save_strategy: "steps"
+
+# Model selection and early stopping
+load_best_model_at_end: true
+metric_for_best_model: "eval_loss"  # Use eval_loss for model selection
+greater_is_better: false  # Lower eval_loss is better
+save_total_limit: 3  # Keep only 3 best checkpoints
+early_stopping_patience: 5  # Stop if no improvement for 5 evaluations
+
+# Learning rate schedule
+warmup_steps: 100  # Warmup for stable training start
+lr_scheduler_type: "cosine"  # Smooth cosine decay after warmup
+
+# System
+report_to: "tensorboard"  # Log to tensorboard for visualization
+remove_unused_columns: false  # Keep all dataset columns
+dataloader_num_workers: 2  # Number of data loading workers

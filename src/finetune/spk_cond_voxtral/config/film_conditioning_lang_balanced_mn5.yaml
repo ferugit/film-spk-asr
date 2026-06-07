@@ -1,0 +1,69 @@
+# Speaker-Conditioned Voxtral Fine-Tuning Config — MareNostrum5
+# ==============================================================
+# Tuned for MN5 ACC nodes: 4× H100 65GB VRAM, 40 CPU cores
+# Uses device_map="auto" (model parallelism) — single-process, no DDP.
+#
+# Changes vs local config:
+#   - per_device_train_batch_size: 2 → 4  (65 GB vs 40 GB VRAM)
+#   - per_device_eval_batch_size:  2 → 4
+#   - gradient_accumulation_steps: 8 → 4  (same effective batch with bigger per-device)
+#   - dataloader_num_workers: 4 → 8       (40 CPUs available)
+
+seed: 2026
+
+# --- Model ---
+model_checkpoint: "mistralai/Voxtral-Mini-3B-2507"
+output_dir: "./models/voxtral-spk-cond-neurovoz-torgo-cv"
+dataset_path: "data/combined_neurovoz_torgo_cv"
+cache_dir: "./models"
+
+# --- SiAMResNet34 (x-vector extractor) ---
+xvector_model_path: "models/SiAMResNet34/samresnet34_w_features.jit"
+train_xvector: true
+xvector_lr_scale: 0.1
+
+# --- FiLM configuration ---
+film_hidden_dim: 512
+film_mode: "per_layer"
+film_use_gate: true
+
+# --- What to train ---
+train_encoder: false
+train_projector: true
+
+# --- Weighted sampling ---
+use_weighted_sampler: false
+
+# --- Training hyperparameters (tuned for 4× H100 65GB) ---
+per_device_train_batch_size: 4       # ↑ doubled (65 GB VRAM)
+per_device_eval_batch_size: 4        # ↑ doubled
+gradient_accumulation_steps: 4       # ↓ halved → same effective batch = 16
+
+learning_rate: 2e-4
+num_train_epochs: 10
+
+bf16: true
+optim: "adamw_torch_fused"
+weight_decay: 0.01
+max_grad_norm: 1.0
+gradient_checkpointing: true
+
+logging_steps: 50
+eval_steps: 200
+save_steps: 200
+eval_strategy: "steps"
+save_strategy: "steps"
+
+load_best_model_at_end: true
+metric_for_best_model: "eval_loss"
+greater_is_better: false
+save_total_limit: 2
+
+report_to: "tensorboard"
+remove_unused_columns: false
+dataloader_num_workers: 8            # ↑ from 4 (40 CPUs on MN5)
+warmup_steps: 200
+lr_scheduler_type: "cosine"
+early_stopping_patience: 5
+generation_max_length: 512
+dataloader_pin_memory: true

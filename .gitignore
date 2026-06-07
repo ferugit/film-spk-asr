@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Data, models, results (large / not redistributable)
+data/
+models/
+results/
+wheels/
+*.pt
+*.jit
+*.safetensors
+*.wav
+*.flac
+
+# Logs / runs
+runs/
+*.log
+tensorboard/
+
+# OS
+.DS_Store

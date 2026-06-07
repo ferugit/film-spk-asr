@@ -1,0 +1,59 @@
+# Encoder-Only Fine-tuning Configuration
+# Only the audio encoder and projector are trained; decoder is frozen
+# This approach is faster and adapts to acoustic conditions while preserving language capabilities
+
+# Training strategy: "full", "encoder_only", or "lora"
+training_strategy: "encoder_only"
+
+# Reproducibility
+seed: 2026  # Random seed for reproducibility
+
+model_checkpoint: "mistralai/Voxtral-Mini-3B-2507"
+output_dir: "./models/voxtral-encoder-finetuned-neurovoz-torgo"
+dataset_path: "data/combined_neurovoz_torgo"
+cache_dir: "./models"
+
+# Weighted sampling to oversample Spanish samples
+use_weighted_sampler: true  # or false (default)
+spanish_weight: 3.0  # Weight for Spanish samples: 1.0 = no weighting, >1.0 increases Spanish sample frequency
+
+# Batch sizes - can potentially use larger batch sizes since fewer parameters are trained
+per_device_train_batch_size: 2  # Increased from 1 (encoder-only uses less memory)
+per_device_eval_batch_size: 2   # Increased from 1
+gradient_accumulation_steps: 8  # Decreased from 16 (effective batch = 16, same as full)
+
+# Learning rate - often can use slightly higher LR for encoder-only
+learning_rate: 2e-5  # 2x higher than full fine-tuning (encoder adapts faster)
+
+# Training duration
+num_train_epochs: 5  # More epochs since only encoder trains (faster per epoch)
+
+# Precision and optimization
+bf16: true
+optim: "adamw_torch_fused"
+weight_decay: 0.01
+max_grad_norm: 1.0
+gradient_checkpointing: true
+
+# Logging and evaluation
+logging_steps: 50
+eval_steps: 200
+save_steps: 200
+eval_strategy: "steps"
+save_strategy: "steps"
+
+# Model selection and early stopping
+load_best_model_at_end: true
+metric_for_best_model: "eval_loss"
+greater_is_better: false
+save_total_limit: 3
+early_stopping_patience: 5
+
+# Learning rate schedule
+warmup_steps: 100
+lr_scheduler_type: "cosine"
+
+# System
+report_to: "tensorboard"
+remove_unused_columns: false
+dataloader_num_workers: 2
