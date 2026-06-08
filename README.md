@@ -99,15 +99,14 @@ python src/scripts/compare_qa_results.py
 ## Citation
 
 ```bibtex
-@inproceedings{lopez2026film,
-  title     = {FiLM-Based Speaker Conditioning of a SpeechLLM for Pathological Speech Recognition},
-  author    = {L\'opez, Fernando and Kesiraju, Santosh and Luque, Jordi},
-  booktitle = {Odyssey 2026: The Speaker and Language Recognition Workshop},
-  year      = {2026},
-  eprint    = {2606.06211},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
-  url       = {https://arxiv.org/abs/2606.06211}
+@misc{lopez2026film,
+      title={FiLM-Based Speaker Conditioning of a SpeechLLM for Pathological Speech Recognition}, 
+      author={Fernando López and Santosh Kesiraju and Jordi Luque},
+      year={2026},
+      eprint={2606.06211},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2606.06211}, 
 }
 ```
 
